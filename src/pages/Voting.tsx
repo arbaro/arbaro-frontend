@@ -7,6 +7,8 @@ import {
   Field,
   Button,
   TextInput,
+  Countdown,
+  SidePanelSplit,
   Info
 } from "@aragon/ui";
 import styled from "styled-components";
@@ -20,6 +22,8 @@ export const VOTE_NAY = Symbol("VOTE_NAY");
 interface IState {
   sideBarOpened: boolean;
   txBarOpened: boolean;
+  detailOpened: boolean;
+  voteDetail?: INewVote;
   question: string;
   votes: Array<INewVote>;
 }
@@ -34,6 +38,16 @@ interface INewVote {
   yea: number;
   nay: number;
 }
+
+enum voteOption {
+  yea,
+  nay
+}
+
+const getQuorumProgress = (yea: number, votingPower: number): number =>
+  yea / votingPower;
+
+const round = (number: number, dec: number): number => number;
 
 const votes: Array<INewVote> = [
   {
@@ -74,12 +88,20 @@ class Voting extends Component {
   state: IState = {
     sideBarOpened: false,
     txBarOpened: false,
+    detailOpened: false,
     question: "",
     votes: []
   };
 
   draftNewPost = () => {
     this.setState({ sideBarOpened: true });
+  };
+
+  viewVote = (id: number) => {
+    this.setState((prevState: IState) => ({
+      detailOpened: true,
+      voteDetail: prevState.votes.find(vote => vote.id === id)
+    }));
   };
 
   processScatter = () => {
@@ -97,6 +119,14 @@ class Voting extends Component {
 
   closeTxPanel = () => {
     this.setState({ txBarOpened: false });
+  };
+
+  closeDetailPanel = () => {
+    this.setState({ detailOpened: false });
+  };
+
+  vote = (id: number, type: voteOption) => {
+    console.log("Sending out vote of", type, "for vote", id);
   };
 
   transactionComplete = (vote: INewVote) => {
@@ -163,7 +193,7 @@ class Voting extends Component {
                 open={vote.open}
                 label={vote.label}
                 votingPower={vote.votingPower}
-                onOpen={() => console.log("fcewce")}
+                onOpen={() => this.viewVote(vote.id)}
                 options={[
                   {
                     label: this.optionLabel("Yes", vote, VOTE_YEA),
@@ -217,9 +247,45 @@ class Voting extends Component {
         >
           <Text>Waiting on Scatter transaction</Text>
         </SidePanel>
+        <SidePanel
+          onClose={this.closeDetailPanel}
+          title="Vote Detail"
+          opened={this.state.detailOpened}
+        >
+          {this.state.voteDetail && (
+            <React.Fragment>
+              <Text>Hello World</Text>
+              <div>
+                <Button
+                  emphasis="positive"
+                  onClick={() =>
+                    this.vote(this.state.voteDetail!.id, voteOption.yea)
+                  }
+                >
+                  Yes
+                </Button>
+                <Button
+                  emphasis="negative"
+                  onClick={() =>
+                    this.vote(this.state.voteDetail!.id, voteOption.nay)
+                  }
+                >
+                  No
+                </Button>
+              </div>
+            </React.Fragment>
+          )}
+        </SidePanel>
       </Container>
     );
   }
 }
+
+const Label = styled(Text).attrs({
+  smallcaps: true
+})`
+  display: block;
+  margin-bottom: 10px;
+`;
 
 export default Voting;
