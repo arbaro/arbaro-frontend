@@ -51,8 +51,8 @@ class EOSIOClient extends React.Component {
       );
 
       // Get a proxy reference to eosjs which you can use to sign transactions with a user's Scatter.
-      const rpc = new JsonRpc(endpoint);
-      this.eos = ScatterJS.scatter.eos(network, Api, { rpc });
+      this.rpc = new JsonRpc(endpoint);
+      this.eos = ScatterJS.scatter.eos(network, Api, { rpc: this.rpc });
     });
   };
 
@@ -76,11 +76,22 @@ class EOSIOClient extends React.Component {
     );
   };
 
-  sign = randomString => {
-    return ScatterJS.scatter.getArbitrarySignature(
-      "EOS6HYRAqNLg5CpZqCd2qjF6A6udx5KKTZupM9zzkuVLXoaBNohrN",
-      randomString
+  sign = async () => {
+    console.log(this.account, "was account");
+    const {
+      last_irreversible_block_id,
+      last_irreversible_block_num
+    } = await this.rpc.get_info();
+
+    const shortBlockId = last_irreversible_block_id.slice(-12);
+    const { publicKey, name, authority } = this.account;
+
+    const message = `${name} would like to login using the ${authority} permission. Block ID: ${last_irreversible_block_num} ${shortBlockId}`;
+    const signature = await ScatterJS.scatter.getArbitrarySignature(
+      publicKey,
+      message
     );
+    return { message, signature };
   };
 
   transaction = (action, data) => {

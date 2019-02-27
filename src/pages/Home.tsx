@@ -66,8 +66,18 @@ class TokenManager extends Component {
 
   sign = async (string: string) => {
     try {
-      const result = await eos.sign(string);
-      console.log(result);
+      console.log("a");
+      const { message, signature } = await eos.sign();
+      console.log({ message, signature }, "passed to component.");
+      const response = await fetch("http://auth.diri.chat/login", {
+        method: "post",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message, signature })
+      }).then(res => res.json());
+      console.log(response);
     } catch (e) {
       console.log(e);
     }
