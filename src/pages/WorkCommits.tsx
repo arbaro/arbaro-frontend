@@ -19,7 +19,7 @@ import styled from "styled-components";
 import { IVote, VoteStatus } from "../interfaces";
 import VotingCard from "../components/VotingCard/VotingCard";
 import VotingCardGroup from "../components/VotingCard/VotingCardGroup";
-
+import { eos } from "../index";
 export const VOTE_YEA = Symbol("VOTE_YEA");
 export const VOTE_NAY = Symbol("VOTE_NAY");
 
@@ -117,10 +117,6 @@ class WorkCommits extends Component {
     this.setState({ detailOpened: false });
   };
 
-  vote = (id: number) => {
-    console.log("Sending out vote offor vote", id);
-  };
-
   transactionComplete = (workCommit: INewWorkCommit) => {
     this.setState((prevState: IState) => ({
       workCommits: [...prevState.workCommits, workCommit]
@@ -137,22 +133,20 @@ class WorkCommits extends Component {
     );
   }
 
-  sendVote = async () => {
+  sendWorkCommit = async () => {
     this.flip();
     const decHours: number = this.state.decHours;
     const notes: string = this.state.notes;
     this.setState({ decHours: 0, notes: "" });
-    console.log(notes, decHours);
+
     // Perform transaction
-    setTimeout(
-      () =>
-        this.transactionComplete({
-          id: 3,
-          notes,
-          decHours
-        }),
-      1500
-    );
+    const tx = await eos.commitWork(decHours, notes);
+    console.log(tx);
+    this.transactionComplete({
+      id: 3,
+      notes,
+      decHours
+    });
   };
 
   render() {
@@ -228,8 +222,8 @@ class WorkCommits extends Component {
               }}
             />
           </Field>
-          <Button mode="strong" onClick={this.sendVote}>
-            Begin Vote
+          <Button mode="strong" onClick={this.sendWorkCommit}>
+            Commit Work
           </Button>
         </SidePanel>
 

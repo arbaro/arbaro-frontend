@@ -3,10 +3,9 @@ import ReactDOM from "react-dom";
 import "./index.css";
 import App from "./App";
 import * as serviceWorker from "./serviceWorker";
-
 import EOSIOClient from "./eosioclient";
 
-export const eos = new EOSIOClient("eosio.token");
+export const eos = new EOSIOClient("arbaro");
 
 ReactDOM.render(<App />, document.getElementById("root"));
 

@@ -1,27 +1,29 @@
 import React, { Component } from "react";
-import {
-  EmptyStateCard,
-  IconFundraising,
-  Text,
-  ToastHub,
-  Button,
-  Toast
-} from "@aragon/ui";
+import { Text } from "@aragon/ui";
+import { PieChart, Pie, Legend, Tooltip } from "recharts";
 import styled from "styled-components";
 import { eos } from "../index";
 
-const randomStringGenerator = (count = 12): string => {
-  var text = "";
-  var possible =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+const data01 = [
+  { name: "Group A", value: 400 },
+  { name: "Group B", value: 300 },
+  { name: "Group C", value: 300 },
+  { name: "Group D", value: 200 },
+  { name: "Group E", value: 278 },
+  { name: "Group F", value: 189 }
+];
 
-  for (var i = 0; i < count; i++) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-  }
-  console.log(text);
+interface PieRow {
+  name: string;
+  value: number;
+}
 
-  return `Pegl2CJHyoXS`;
-};
+interface WorkerInterface {
+  key: string;
+  payrate: number;
+  roleaccepted: boolean;
+  shares: number;
+}
 
 const Container = styled.div`
   width: 1200px;
@@ -37,7 +39,22 @@ const Container = styled.div`
 class TokenManager extends Component {
   state = {
     authLoading: false,
-    scatterLoading: false
+    scatterLoading: false,
+    pieRows: []
+  };
+
+  componentDidMount() {
+    this.fetchWorkersTable();
+  }
+
+  fetchWorkersTable = async () => {
+    const result = await eos.getTable("workers");
+    this.setState({
+      pieRows: result.rows.map((worker: WorkerInterface) => ({
+        name: worker.key,
+        value: worker.shares
+      }))
+    });
   };
 
   triggerTx = async (callback: any): Promise<void> => {
@@ -83,63 +100,22 @@ class TokenManager extends Component {
     }
   };
 
-  donate = async () => {
-    const tokenDetails = {
-      contract: "eosio.token",
-      symbol: "EOS",
-      memo: "",
-      decimals: 4
-    };
-
-    try {
-      const result = await eos.donate();
-      console.log(result);
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
   render() {
     return (
       <Container>
-        <EmptyStateCard
-          actionText="New work commit"
-          text="This organisation has no work commits."
-          onActivate={this.auth}
-          icon={() => <IconFundraising color="blue" />}
-        />
-        <EmptyStateCard
-          actionText="Sign"
-          text="Sign bitch."
-          onActivate={() => this.sign(randomStringGenerator())}
-          icon={() => <IconFundraising color="blue" />}
-        />
-        <EmptyStateCard
-          actionText="Donate"
-          text="Click here to donate!"
-          onActivate={this.donate}
-          icon={() => <IconFundraising color="blue" />}
-        />
-
-        <ToastHub>
-          <Toast>
-            {(toast: any) => {
-              return (
-                <EmptyStateCard
-                  actionText="New work commit"
-                  text="Send EOS."
-                  onActivate={() => this.triggerTx(toast)}
-                  icon={() => <IconFundraising color="blue" />}
-                />
-              );
-            }}
-          </Toast>
-        </ToastHub>
-        <Text>
-          {this.state.scatterLoading
-            ? "Scatter Loading"
-            : "Scatter not Loading"}
-        </Text>
+        <PieChart width={400} height={400}>
+          <Pie
+            dataKey="value"
+            isAnimationActive={false}
+            data={this.state.pieRows}
+            cx={200}
+            cy={200}
+            outerRadius={80}
+            fill="#8884d8"
+            label
+          />
+          <Tooltip />
+        </PieChart>
       </Container>
     );
   }
