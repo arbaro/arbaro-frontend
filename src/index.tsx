@@ -5,7 +5,7 @@ import App from "./App";
 import * as serviceWorker from "./serviceWorker";
 import EOSIOClient from "./eosioclient";
 
-export const eos = new EOSIOClient("arbaro");
+export const eos = new EOSIOClient();
 
 ReactDOM.render(<App />, document.getElementById("root"));
 

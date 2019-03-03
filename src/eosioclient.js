@@ -3,21 +3,27 @@ import { Api, JsonRpc } from "eosjs";
 import ScatterJS from "scatterjs-core";
 import ScatterEOS from "scatterjs-plugin-eosjs2"; // Use eosjs2 if your version of eosjs is > 16
 
-const endpoint = "http://localhost:8888";
+const protocol = process.env.REACT_APP_EOSRPC_PROTOCOL;
+const host = process.env.REACT_APP_EOSRPC_HOST;
+const port = process.env.REACT_APP_EOSRPC_PORT;
+const chainId = process.env.REACT_APP_EOSRPC_CHAINID;
+
+const endpoint = `${protocol}://${host}:${port}`;
 
 // Networks are used to reference certain blockchains.
 // They let you get accounts and help you build signature providers.
 const network = {
   blockchain: "eos",
-  protocol: "http",
-  host: "localhost",
-  port: 8888,
-  chainId: "cf057bbfb72640471fd910bcb67639c22df9f92470936cddc1ade0e2f2e7dc4f"
+  protocol,
+  host,
+  port,
+  chainId
 };
 
 class EOSIOClient extends React.Component {
-  constructor(contractAccount) {
-    super(contractAccount);
+  constructor() {
+    super();
+    const contractAccount = process.env.REACT_APP_CONTRACT_NAME;
     this.contractAccount = contractAccount;
     this.rpc = new JsonRpc(endpoint);
     // Don't forget to tell ScatterJS which plugins you are using.
@@ -74,7 +80,7 @@ class EOSIOClient extends React.Component {
 
   commitWork = async (dechours, notes) => {
     const { name } = this.account;
-    const worker = "alice";
+    const worker = name;
     return this.transaction("claimtime", { worker, dechours, notes });
   };
 
