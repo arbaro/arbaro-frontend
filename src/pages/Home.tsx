@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-import { Text } from "@aragon/ui";
-import { PieChart, Pie, Legend, Tooltip } from "recharts";
+import { Text, Table, TableHeader, TableRow, TableCell } from "@aragon/ui";
+import { PieChart, Pie, Tooltip } from "recharts";
 import styled from "styled-components";
 import { eos } from "../index";
 
@@ -116,6 +116,21 @@ class TokenManager extends Component {
           />
           <Tooltip />
         </PieChart>
+        <Table
+          header={
+            <TableRow>
+              <TableHeader title="Team Members" />
+            </TableRow>
+          }
+        >
+          {this.state.pieRows.map((row: any, index: number) => (
+            <TableRow key={index}>
+              <TableCell>
+                <Text>{row.name}</Text>
+              </TableCell>
+            </TableRow>
+          ))}
+        </Table>
       </Container>
     );
   }
